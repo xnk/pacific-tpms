@@ -5,7 +5,7 @@ I was inspired by the excellent TPMS work by Jared Boone (https://github.com/jbo
 
 This is what I came up with after decoding a lot of messages from the real sensors (9 different ones) and sending custom messages to the TPMS unit in the car while watching the diagnostic tool:
 
-FSK modulation at 315.98MHz, deviation around +/- 35kHz. Raw bitrate around 9910bps
+FSK modulation at 314.98MHz, deviation around +/- 35kHz. Raw bitrate around 9910bps
 Preamble 0001111110 (the last two bits are probably a first, ignored, manchester encoded bit) as the remaining message assumes a diffman decode starting at 1
 
 Packet bit format after differential manchester decoding (MSB first)
