@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 #
@@ -32,11 +32,6 @@ from optparse import OptionParser
 import osmosdr
 import time
 import crcmod
-
-# From the TPSM code
-def split_string_bytes(data, start_offset):
-        for n in range(start_offset, len(data), 8):
-                yield data[n:n+8]
 
 def differential_manchester_encode(s):
         last_bit = 0
@@ -140,17 +135,14 @@ def main(top_block_cls=toyota_tpms_tx, options=None):
 
     # Temperature in Celsius with a constant 40 added (resulting range -40 to 215C)
     temperature = format(42 + 40, '08b')
-    #temperature = '00110001'
 
     # Assemble the complete payload to calculate CRC
     payload = device + battlow + ctr + mustbezero + ignored + fault + pressurebits + pressureinvbits + temperature
 
     # Pad payload to make it even 8 bits (won't affect CRC8 as long as it's done in front)
     padpayload = '000000'+payload
-    crc_bytes_str = tuple(split_string_bytes(padpayload, 0))
-    crc_bytes = map(lambda v: int(v, 2), crc_bytes_str)
-    crc_str = ''.join(map(chr, crc_bytes))
-    calculated_crc = crc8(crc_str[0:8])
+    crc_bytes = int(padpayload, 2).to_bytes(len(padpayload) // 8, byteorder='big')
+    calculated_crc = crc8(crc_bytes[0:8])
     crc_bits = format(calculated_crc, '08b')
 
     bitstream = '00000000000000001111110' + differential_manchester_encode('1'+payload+crc_bits+'1') + '000000'

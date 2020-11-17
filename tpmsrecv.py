@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 #
@@ -41,10 +41,6 @@ import crcmod
 
 usefile=0
 
-def split_string_bytes(data, start_offset):
-        for n in range(start_offset, len(data), 8):
-                yield data[n:n+8]
-
 def decode_pacific(payload):
         crc8 = crcmod.mkCrcFun(0x113, rev=False, initCrc=0, xorOut=0)
         decoded_data = []
@@ -52,17 +48,12 @@ def decode_pacific(payload):
 
         # Pack bits into bytes in two ways, aligned to the end and beginning of message
         padpayload = '000000'+payload
-        crc_bytes_str = tuple(split_string_bytes(padpayload, 0))
-        crc_bytes = map(lambda v: int(v, 2), crc_bytes_str)
-        crc_str = ''.join(map(chr, crc_bytes))
+        crc_bytes = int(padpayload, 2).to_bytes(len(padpayload) // 8, byteorder='big')
 
-        payload_bytes_str = tuple(split_string_bytes(payload, 0))
-        payload_bytes = map(lambda v: int(v, 2), payload_bytes_str)
-        payload_str = ''.join(map(chr, payload_bytes))
+        payload_bytes = int(payload + '000000', 2).to_bytes(len(padpayload) // 8, byteorder='big')
 
-        device_id = ''.join(payload_str[0:6])
         packet_crc = crc_bytes[8]
-        calculated_crc = crc8(crc_str[0:8])
+        calculated_crc = crc8(crc_bytes[0:8])
         crc_ok = (calculated_crc == packet_crc) and (0xff == (crc_bytes[5] ^ crc_bytes[6]))
 
         pressure = 2.48 * (crc_bytes[5] - 40)
@@ -74,7 +65,7 @@ def decode_pacific(payload):
                         payload[28:29], (payload_bytes[3]&0x6)>>1, payload[31:33], payload[33:34], pressure, temperature
                 ))
         else:
-                print('CRC error, not decoding')
+                print('CRC error, not decoding (%s) (%s)', payload, payload_bytes.hex())
 
 
 class tpmsrx(gr.sync_block):
