@@ -16,7 +16,7 @@ Packet bit format after differential manchester decoding (MSB first)
 | 28     | 1      | Battery status         | 1 if low, 0 if ok or 'over' in Toyota speak |
 | 29     | 2      | Counter                | Counts 1,2,3 for every message out of the sensor. Car seems to ignore this and happily accepts the same counter over and over without ever changing |
 | 31     | 1      | Unknown                | Must be zero for the packet to be recognized by the car (haven't seen a real sensor ever set this bit) |
-| 32     | 1      | Unknown                | Seems to be ignored by the car, sensors sets this to 0 |
+| 32     | 1      | Rapid pressure drop?   | Seems to be ignored by the car, I've seen some sensors setting this bit to 1 when pressure is changing fast. This also triggers multiple transmissions in rapid succession |
 | 33     | 1      | Self-test failed?      | My sensors sets this to 0 but when I send a message with this bit set to 1 to the car the TPMS light starts flashing and the values in the message are ignored |
 | 34     | 8      | Tire pressure          | PSI/0.363 + 40 or kPa/2.48 + 40, diagnostics reports this in PSI |
 | 42     | 8      | Inverted tire pressure | xor 0xff of above |
